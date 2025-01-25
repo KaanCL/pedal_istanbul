@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:pedal_istanbul/respository/directions_respository.dart';
 
 
   class RouteMarker extends Marker {
@@ -58,5 +59,18 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
         return polylines;
     }
 
+
+    Future<void> getRouteInfo() async{
+
+      try{
+        final Direction = await DirectionsRepository().getRouteInfo(
+            origin: markers.first.position,
+            destination: markers.last.position);
+          print("${Direction.totalDistance} " + " ${Direction.totalDuration} " +" ${Direction.caloriesBurned} " );
+         }catch(e){
+        print(e.toString());
+      }
+
+    }
 
   }

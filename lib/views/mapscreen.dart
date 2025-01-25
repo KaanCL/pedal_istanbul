@@ -160,16 +160,9 @@ class _MapScreenState extends State<MapScreen> {
 
     RouteMarker? routeMarker = null;
     Marker? tempRouteMarker = null;
-    if (_routePoints.length < 2) return;
-
-    final midPoint = LatLng(
-      (_routePoints.first.latitude + _routePoints.last.latitude) / 2,
-      (_routePoints.first.longitude + _routePoints.last.longitude) / 2,
-    );
-
 
     routeMarker = RouteMarker(
-      position: midPoint,
+      position: markers.first.position,
       infoWindow: InfoWindow(title: "Rota Bilgisi"),
       icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
       markers: Set.from(markers.map((m) => Marker(
@@ -191,7 +184,7 @@ class _MapScreenState extends State<MapScreen> {
 
     tempRouteMarker= Marker(
         markerId: routeMarker.markerId,
-        position: midPoint,
+        position: markers.first.position,
         infoWindow:InfoWindow(title: "Rota Bilgisi"),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
         onTap: () {
@@ -209,7 +202,7 @@ class _MapScreenState extends State<MapScreen> {
    setState(() {
      print("Tapped marker position: ${marker.position}");
      _selectedMarker = marker;
-     print("${marker.polylines.first.points}");
+     marker.getRouteInfo();
    });
  }
 
