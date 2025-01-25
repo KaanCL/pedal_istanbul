@@ -19,13 +19,14 @@ class _MapScreenState extends State<MapScreen> {
  final Set<Marker> _markers = {};
 
  final Set<Marker> _tempMarkers= {};
- List<LatLng> _tempRoutePoints = [];
+
 
  int _polyLineIdCounter = 0;
  int _markerIdCounter = 0;
 
  bool _isEditing = false;
 
+ RouteMarker? _selectedMarker = null;
 
 
  @override
@@ -35,7 +36,7 @@ class _MapScreenState extends State<MapScreen> {
   }
 
 
- RouteMarker? _selectedMarker = null;
+
 
  final LatLngBounds istanbulBounds = LatLngBounds(
        southwest: LatLng(40.8024, 28.5245),
@@ -51,7 +52,17 @@ class _MapScreenState extends State<MapScreen> {
              initialCameraPosition: CameraPosition(target: LatLng(41.0082, 28.9784), zoom: 12),
               polylines: _isEditing ? _polylines : (_selectedMarker?.getPolylines ?? {}),
               markers:   _isEditing ? _tempMarkers : (_selectedMarker == null ? _markers : (_selectedMarker?.getMarkers ?? {})),
-              onTap: _addRoutePoint,
+              onTap: (LatLng pos){
+                  if(_isEditing){
+                    _addRoutePoint(pos);
+                  }else{
+                    setState(() {
+                      _selectedMarker = null;
+                      _isEditing = false;
+                    });
+                  }
+
+              } ,
               onMapCreated: (GoogleMapController controller) {_mapController = controller;},
               minMaxZoomPreference: MinMaxZoomPreference(10, 15),
               cameraTargetBounds: CameraTargetBounds(istanbulBounds),
@@ -96,7 +107,7 @@ class _MapScreenState extends State<MapScreen> {
                 FloatingActionButton(
                   onPressed:(){
                     setState(() {
-                      _addRouteMarker();
+                      _addRouteMarker(_tempMarkers,_polylines);
                       _isEditing=false;
                       _selectedMarker=null;
                     });} ,
@@ -115,8 +126,6 @@ class _MapScreenState extends State<MapScreen> {
     setState(() {
       _routePoints.add(point);
 
-      _tempRoutePoints = _routePoints;
-
       _tempMarkers.add(Marker(
           markerId: MarkerId('marker_${_markerIdCounter++}'),
           position:point,
@@ -128,7 +137,7 @@ class _MapScreenState extends State<MapScreen> {
         _polylines.clear();
         _polylines.add(Polyline(
             polylineId: PolylineId('route_${_polyLineIdCounter++}'),
-            points: _tempRoutePoints,
+            points: _routePoints,
             color:Colors.blue,
             width: 5,
         ));
@@ -145,9 +154,8 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
-  void _addRouteMarker(){
+  void _addRouteMarker(Set<Marker> markers , Set<Polyline> polylines){
 
-    _tempRoutePoints = _routePoints;
     setState(() {
 
     RouteMarker? routeMarker = null;
@@ -161,14 +169,25 @@ class _MapScreenState extends State<MapScreen> {
 
 
     routeMarker = RouteMarker(
-       position: midPoint,
-       infoWindow:InfoWindow(title: "Rota Bilgisi"),
-       icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
-       markers: Set.from(_tempMarkers),
-       polylines: Set.from(_polylines),
-       onTap: () {
-         _onMarkerTap(routeMarker!);
-       });
+      position: midPoint,
+      infoWindow: InfoWindow(title: "Rota Bilgisi"),
+      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
+      markers: Set.from(markers.map((m) => Marker(
+        markerId: m.markerId,
+        position: m.position,
+        infoWindow: m.infoWindow,
+        icon: m.icon,
+      ))),
+      polylines: Set.from(polylines.map((p) => Polyline(
+        polylineId: p.polylineId,
+        points: List<LatLng>.from(p.points),
+        color: p.color,
+        width: p.width,
+      ))),
+      onTap: () {
+        _onMarkerTap(routeMarker!);
+      },
+    );
 
     tempRouteMarker= Marker(
         markerId: routeMarker.markerId,
@@ -210,8 +229,8 @@ class _MapScreenState extends State<MapScreen> {
                 width: 5,
               ),
           );
-          _markers.remove(_markers.elementAt(_markers.length-1));
-          _markers.add(Marker(
+          _tempMarkers.remove(_tempMarkers.elementAt(_tempMarkers.length-1));
+          _tempMarkers.add(Marker(
               markerId: MarkerId('marker'),
               position:_routePoints.last,
               infoWindow:InfoWindow(title: "varis"),
@@ -220,7 +239,7 @@ class _MapScreenState extends State<MapScreen> {
         }else{
           _routePoints.clear();
           _polylines.clear();
-          _markers.clear();
+          _tempMarkers.clear();
         }
 
       }
