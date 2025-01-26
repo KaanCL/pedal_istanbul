@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:pedal_istanbul/models/routemarker.dart';
+import 'package:pedal_istanbul/widgets/menubutton.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -46,6 +47,10 @@ class _MapScreenState extends State<MapScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text("${_isEditing ? "Add Route" : "Select Route"}"),
+        centerTitle: true,
+      ),
       body: Stack(
         children: [
           GoogleMap(
@@ -72,50 +77,51 @@ class _MapScreenState extends State<MapScreen> {
             right: 10,
             child: Column(
               children: [
-                FloatingActionButton(
-                  onPressed: _clearRoute,
-                  child: Icon(Icons.clear),
+                if(_isEditing)
+                MenuButton(
+                  onPressed: (){
+                    setState(() {
+                      _selectedMarker = null;
+                      _isEditing = false;
+                  });},
+                  image:Image.asset('assets/images/cancel.png') ,
                 ),
                 SizedBox(height: 5,),
-                FloatingActionButton(
-                  onPressed:(){
-                    setState(() {
-                      _routePoints.clear();
-                      if(_isEditing){
-                        _tempMarkers.clear();
-                        _polylines.clear();
-                      }else{
-                        _markers.clear();
-                        _isEditing = true;
-                      }
-                  });} ,
-                  child: Icon(Icons.cleaning_services_outlined),
+                if(_isEditing)
+                MenuButton(
+                  onPressed: _undoRoute,
+                  image: Image.asset('assets/images/undo.png'),
+                ),
+                SizedBox(height: 5,),
+                if(_isEditing || _selectedMarker !=null)
+                MenuButton(
+                  onPressed: _deleteRoute,
+                  image: Image.asset('assets/images/delete.png'),
                 ),
                 SizedBox(height: 5,),
                 if(_isEditing==false)
-                  FloatingActionButton(
-                    backgroundColor: Colors.deepOrange,
-                    onPressed: () {
-                      setState(() {
-                        _isEditing = true;
-                      });
-                    },
-                    child: Icon(Icons.add),
+                  MenuButton(
+                      onPressed:() {
+                        setState(() {
+                          _isEditing = true;
+                          });},
+                      image: Image.asset('assets/images/add.png'),
                   ),
                 SizedBox(height: 5,),
                 if(_isEditing)
-                FloatingActionButton(
-                  onPressed:(){
-                    setState(() {
+                  MenuButton(
+                    onPressed:(){
+                      setState(() {
                       _addRouteMarker(_tempMarkers,_polylines);
                       _isEditing=false;
                       _selectedMarker=null;
-                    });} ,
-                  child: Icon(Icons.offline_pin),
-                ),
+                      });} ,
+                   image:  Image.asset('assets/images/check.png'),
+                  ),
               ],
             ),
           )
+
         ],
       ),
 
@@ -206,7 +212,7 @@ class _MapScreenState extends State<MapScreen> {
    });
  }
 
-  void _clearRoute(){
+  void _undoRoute(){
     setState(() {
       if(_routePoints.isNotEmpty){
         _routePoints.removeLast();
@@ -240,7 +246,17 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
-
-
+  void _deleteRoute(){
+    setState(() {
+      if(_selectedMarker != null) {
+        _markers.remove(_selectedMarker);
+        _selectedMarker = null;
+      }else{
+        _routePoints.clear();
+        _tempMarkers.clear();
+        _polylines.clear();
+      }
+    });
+  }
 
 }
