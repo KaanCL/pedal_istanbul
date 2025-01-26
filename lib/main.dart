@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:pedal_istanbul/providers/appstate.dart';
 import 'package:pedal_istanbul/views/mapscreen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
 
 void main() async{
   await dotenv.load();
-  runApp(const MyApp());
+  runApp(ChangeNotifierProvider(
+    create: (context) => AppState(),
+    child: MyApp(),
+  ),
+  );
 }
 
 class MyApp extends StatelessWidget {

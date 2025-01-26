@@ -1,9 +1,10 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:pedal_istanbul/models/routemarker.dart';
+import 'package:pedal_istanbul/providers/appstate.dart';
 import 'package:pedal_istanbul/widgets/menubutton.dart';
+import 'package:pedal_istanbul/widgets/rightmenu.dart';
+import 'package:provider/provider.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -13,249 +14,205 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
+  late GoogleMapController _mapController;
+  final List<LatLng> _routePoints = [];
+  final Set<Polyline> _polylines = {};
+  final Set<Marker> _markers = {};
+  final Set<Marker> _tempMarkers = {};
 
- late GoogleMapController _mapController;
- final List<LatLng> _routePoints = [];
- final Set<Polyline> _polylines = {};
- final Set<Marker> _markers = {};
+  int _polyLineIdCounter = 0;
+  int _markerIdCounter = 0;
 
- final Set<Marker> _tempMarkers= {};
-
-
- int _polyLineIdCounter = 0;
- int _markerIdCounter = 0;
-
- bool _isEditing = false;
-
- RouteMarker? _selectedMarker = null;
-
-
- @override
+  @override
   void initState() {
-   super.initState();
-   _isEditing = true;
+    super.initState();
+    Provider.of<AppState>(context, listen: false).setEditing(true);
   }
 
-
-
-
- final LatLngBounds istanbulBounds = LatLngBounds(
-       southwest: LatLng(40.8024, 28.5245),
-       northeast: LatLng(41.3201, 29.4305),
- );
+  final LatLngBounds istanbulBounds = LatLngBounds(
+    southwest: LatLng(40.8024, 28.5245),
+    northeast: LatLng(41.3201, 29.4305),
+  );
 
   @override
   Widget build(BuildContext context) {
+    final appState = Provider.of<AppState>(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text("${_isEditing ? "Add Route" : "Select Route"}"),
+        title: Text("${appState.isEditing ? "Add Route" : "Select Route"}"),
         centerTitle: true,
       ),
       body: Stack(
         children: [
           GoogleMap(
-             initialCameraPosition: CameraPosition(target: LatLng(41.0082, 28.9784), zoom: 12),
-              polylines: _isEditing ? _polylines : (_selectedMarker?.getPolylines ?? {}),
-              markers:   _isEditing ? _tempMarkers : (_selectedMarker == null ? _markers : (_selectedMarker?.getMarkers ?? {})),
-              onTap: (LatLng pos){
-                  if(_isEditing){
-                    _addRoutePoint(pos);
-                  }else{
-                    setState(() {
-                      _selectedMarker = null;
-                      _isEditing = false;
-                    });
-                  }
-
-              } ,
-              onMapCreated: (GoogleMapController controller) {_mapController = controller;},
-              minMaxZoomPreference: MinMaxZoomPreference(10, 15),
-              cameraTargetBounds: CameraTargetBounds(istanbulBounds),
+            initialCameraPosition: CameraPosition(target: LatLng(41.0082, 28.9784), zoom: 12),
+            polylines: appState.isEditing ? _polylines : (appState.selectedMarker?.getPolylines ?? {}),
+            markers: appState.isEditing ? _tempMarkers : (appState.selectedMarker == null ? _markers : (appState.selectedMarker?.getMarkers ?? {})),
+            onTap: (LatLng pos) {
+              if (appState.isEditing) {
+                _addRoutePoint(pos);
+              } else {
+                setState(() {
+                  appState.setSelectedMarker(null);
+                  appState.setEditing(false);
+                });
+              }
+            },
+            onMapCreated: (GoogleMapController controller) {
+              _mapController = controller;
+            },
+            minMaxZoomPreference: MinMaxZoomPreference(10, 15),
+            cameraTargetBounds: CameraTargetBounds(istanbulBounds),
           ),
           Positioned(
             top: 50,
             right: 10,
-            child: Column(
-              children: [
-                if(_isEditing)
-                MenuButton(
-                  onPressed: (){
-                    setState(() {
-                      _selectedMarker = null;
-                      _isEditing = false;
-                  });},
-                  image:Image.asset('assets/images/cancel.png') ,
-                ),
-                SizedBox(height: 5,),
-                if(_isEditing)
-                MenuButton(
-                  onPressed: _undoRoute,
-                  image: Image.asset('assets/images/undo.png'),
-                ),
-                SizedBox(height: 5,),
-                if(_isEditing || _selectedMarker !=null)
-                MenuButton(
-                  onPressed: _deleteRoute,
-                  image: Image.asset('assets/images/delete.png'),
-                ),
-                SizedBox(height: 5,),
-                if(_isEditing==false)
-                  MenuButton(
-                      onPressed:() {
-                        setState(() {
-                          _isEditing = true;
-                          });},
-                      image: Image.asset('assets/images/add.png'),
-                  ),
-                SizedBox(height: 5,),
-                if(_isEditing)
-                  MenuButton(
-                    onPressed:(){
-                      setState(() {
-                      _addRouteMarker(_tempMarkers,_polylines);
-                      _isEditing=false;
-                      _selectedMarker=null;
-                      });} ,
-                   image:  Image.asset('assets/images/check.png'),
-                  ),
-              ],
-            ),
-          )
+            child: RightMenu(
+              setEdit: _setEdit,
+              deleteRoute: _deleteRoute,
+              cancelEdit: _cancelEdit,
+              confirmEdit: _confirmEdit,
+              undoRoute: _undoRoute,
+            )
 
+          ),
         ],
       ),
-
     );
   }
 
-  void _addRoutePoint(LatLng point){
+  void _addRoutePoint(LatLng point) {
     setState(() {
       _routePoints.add(point);
 
       _tempMarkers.add(Marker(
-          markerId: MarkerId('marker_${_markerIdCounter++}'),
-          position:point,
-          infoWindow:InfoWindow(title: "Başlangıc"),
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen)
+        markerId: MarkerId('marker_${_markerIdCounter++}'),
+        position: point,
+        infoWindow: InfoWindow(title: "Başlangıc"),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
       ));
 
-      if(_routePoints.length >= 2){
+      if (_routePoints.length >= 2) {
         _polylines.clear();
         _polylines.add(Polyline(
-            polylineId: PolylineId('route_${_polyLineIdCounter++}'),
-            points: _routePoints,
-            color:Colors.blue,
-            width: 5,
+          polylineId: PolylineId('route_${_polyLineIdCounter++}'),
+          points: _routePoints,
+          color: Colors.blue,
+          width: 5,
         ));
-        _tempMarkers.remove(_tempMarkers.elementAt(_tempMarkers.length-1));
+        _tempMarkers.remove(_tempMarkers.elementAt(_tempMarkers.length - 1));
         _tempMarkers.add(Marker(
-            markerId: MarkerId('marker'),
-            position:_routePoints.last,
-            infoWindow:InfoWindow(title: "varis"),
-            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue)
+          markerId: MarkerId('marker'),
+          position: _routePoints.last,
+          infoWindow: InfoWindow(title: "varis"),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
         ));
-
-
       }
     });
   }
 
-  void _addRouteMarker(Set<Marker> markers , Set<Polyline> polylines){
-
+  void _addRouteMarker(Set<Marker> markers, Set<Polyline> polylines) {
     setState(() {
+      RouteMarker? routeMarker = null;
 
-    RouteMarker? routeMarker = null;
-    Marker? tempRouteMarker = null;
-
-    routeMarker = RouteMarker(
-      position: markers.first.position,
-      infoWindow: InfoWindow(title: "Rota Bilgisi"),
-      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
-      markers: Set.from(markers.map((m) => Marker(
-        markerId: m.markerId,
-        position: m.position,
-        infoWindow: m.infoWindow,
-        icon: m.icon,
-      ))),
-      polylines: Set.from(polylines.map((p) => Polyline(
-        polylineId: p.polylineId,
-        points: List<LatLng>.from(p.points),
-        color: p.color,
-        width: p.width,
-      ))),
-      onTap: () {
-        _onMarkerTap(routeMarker!);
-      },
-    );
-
-    tempRouteMarker= Marker(
-        markerId: routeMarker.markerId,
+      routeMarker = RouteMarker(
         position: markers.first.position,
-        infoWindow:InfoWindow(title: "Rota Bilgisi"),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
+        infoWindow: InfoWindow(title: "Rota Bilgisi"),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
+        markers: Set.from(markers.map((m) => Marker(
+          markerId: m.markerId,
+          position: m.position,
+          infoWindow: m.infoWindow,
+          icon: m.icon,
+        ))),
+        polylines: Set.from(polylines.map((p) => Polyline(
+          polylineId: p.polylineId,
+          points: List<LatLng>.from(p.points),
+          color: p.color,
+          width: p.width,
+        ))),
         onTap: () {
           _onMarkerTap(routeMarker!);
-        });
+        },
+      );
 
-       _tempMarkers.clear();
+      _tempMarkers.clear();
       _markers.add(routeMarker!);
       _routePoints.clear();
       _polylines.clear();
     });
   }
 
- void _onMarkerTap(RouteMarker marker) {
-   setState(() {
-     print("Tapped marker position: ${marker.position}");
-     _selectedMarker = marker;
-     marker.getRouteInfo();
-   });
- }
-
-  void _undoRoute(){
+  void _onMarkerTap(RouteMarker marker) {
     setState(() {
-      if(_routePoints.isNotEmpty){
+      print("Tapped marker position: ${marker.position}");
+      Provider.of<AppState>(context, listen: false).setSelectedMarker(marker);
+      marker.getRouteInfo();
+    });
+  }
+
+  void _cancelEdit(){
+    setState(() {
+      Provider.of<AppState>(context, listen: false).setSelectedMarker(null);
+      Provider.of<AppState>(context, listen: false).setEditing(false);
+    });
+  }
+
+  void _undoRoute() {
+    setState(() {
+      if (_routePoints.isNotEmpty) {
         _routePoints.removeLast();
 
-
-        if(_routePoints.length >= 2){
+        if (_routePoints.length >= 2) {
           _polylines.clear();
-          _polylines.add(
-              Polyline(
-                polylineId: PolylineId('route_${_polyLineIdCounter++}'),
-                points: _routePoints,
-                color: Colors.blue,
-                width: 5,
-              ),
-          );
-          _tempMarkers.remove(_tempMarkers.elementAt(_tempMarkers.length-1));
-          _tempMarkers.add(Marker(
-              markerId: MarkerId('marker'),
-              position:_routePoints.last,
-              infoWindow:InfoWindow(title: "varis"),
-              icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue)
+          _polylines.add(Polyline(
+            polylineId: PolylineId('route_${_polyLineIdCounter++}'),
+            points: _routePoints,
+            color: Colors.blue,
+            width: 5,
           ));
-        }else{
+          _tempMarkers.remove(_tempMarkers.elementAt(_tempMarkers.length - 1));
+          _tempMarkers.add(Marker(
+            markerId: MarkerId('marker'),
+            position: _routePoints.last,
+            infoWindow: InfoWindow(title: "varis"),
+            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+          ));
+        } else {
           _routePoints.clear();
           _polylines.clear();
           _tempMarkers.clear();
         }
-
       }
-
     });
   }
 
-  void _deleteRoute(){
+  void _deleteRoute() {
     setState(() {
-      if(_selectedMarker != null) {
-        _markers.remove(_selectedMarker);
-        _selectedMarker = null;
-      }else{
+      if (Provider.of<AppState>(context, listen: false).selectedMarker != null) {
+        _markers.remove(Provider.of<AppState>(context, listen: false).selectedMarker);
+        Provider.of<AppState>(context, listen: false).setSelectedMarker(null);
+      } else {
         _routePoints.clear();
         _tempMarkers.clear();
         _polylines.clear();
       }
+    });
+  }
+
+  void _confirmEdit(){
+    setState(() {
+      _addRouteMarker(_tempMarkers, _polylines);
+      Provider.of<AppState>(context, listen: false).setEditing(false);
+      Provider.of<AppState>(context, listen: false).setSelectedMarker(null);
+    });
+  }
+
+  void _setEdit(){
+    setState(() {
+      Provider.of<AppState>(context, listen: false).setSelectedMarker(null);
+      Provider.of<AppState>(context, listen: false).setEditing(true);
     });
   }
 
