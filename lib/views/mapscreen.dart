@@ -1,7 +1,11 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:pedal_istanbul/models/routemarker.dart';
 import 'package:pedal_istanbul/providers/appstate.dart';
+import 'package:pedal_istanbul/widgets/bottombar.dart';
 import 'package:pedal_istanbul/widgets/menubutton.dart';
 import 'package:pedal_istanbul/widgets/rightmenu.dart';
 import 'package:provider/provider.dart';
@@ -15,10 +19,13 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   late GoogleMapController _mapController;
+  String? _mapStyle;
   final List<LatLng> _routePoints = [];
   final Set<Polyline> _polylines = {};
   final Set<Marker> _markers = {};
   final Set<Marker> _tempMarkers = {};
+
+
 
   int _polyLineIdCounter = 0;
   int _markerIdCounter = 0;
@@ -26,7 +33,15 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void initState() {
     super.initState();
+    _loadMapStyle();
     Provider.of<AppState>(context, listen: false).setEditing(true);
+  }
+
+  Future<void> _loadMapStyle() async{
+    String style = await rootBundle.loadString('assets/mapstyle/mapstyle.json');
+    setState(() {
+      _mapStyle = style;
+    });
   }
 
   final LatLngBounds istanbulBounds = LatLngBounds(
@@ -40,7 +55,8 @@ class _MapScreenState extends State<MapScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("${appState.isEditing ? "Add Route" : "Select Route"}"),
+        backgroundColor: Colors.black,
+        title: Text("${appState.isEditing ? "Add Route" : "Select Route"}",style: TextStyle(color: Colors.white),),
         centerTitle: true,
       ),
       body: Stack(
@@ -61,6 +77,10 @@ class _MapScreenState extends State<MapScreen> {
             },
             onMapCreated: (GoogleMapController controller) {
               _mapController = controller;
+              if(_mapStyle !=null){
+                print("AAAAAAAAAAAAAAAAAAAAA"*100);
+                _mapController.setMapStyle(_mapStyle!);
+              }
             },
             minMaxZoomPreference: MinMaxZoomPreference(10, 15),
             cameraTargetBounds: CameraTargetBounds(istanbulBounds),
@@ -79,6 +99,7 @@ class _MapScreenState extends State<MapScreen> {
           ),
         ],
       ),
+      bottomNavigationBar:BottomBar()
     );
   }
 

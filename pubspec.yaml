@@ -72,7 +72,11 @@ flutter:
     - assets/images/check.png
     - assets/images/delete.png
     - assets/images/undo.png
-
+    - assets/images/home.png
+    - assets/images/routes.png
+    - assets/images/chatbot.png
+    - assets/images/favorites.png
+    - assets/mapstyle/mapstyle.json
 
 
       # An image asset can refer to one or more resolution-specific "variants", see
