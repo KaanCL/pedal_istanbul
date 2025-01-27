@@ -25,8 +25,6 @@ class _MapScreenState extends State<MapScreen> {
   final Set<Marker> _markers = {};
   final Set<Marker> _tempMarkers = {};
 
-
-
   int _polyLineIdCounter = 0;
   int _markerIdCounter = 0;
 
@@ -53,39 +51,30 @@ class _MapScreenState extends State<MapScreen> {
   Widget build(BuildContext context) {
     final appState = Provider.of<AppState>(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        title: Text("${appState.isEditing ? "Add Route" : "Select Route"}",style: TextStyle(color: Colors.white),),
-        centerTitle: true,
-      ),
-      body: Stack(
-        children: [
-          GoogleMap(
-            initialCameraPosition: CameraPosition(target: LatLng(41.0082, 28.9784), zoom: 12),
-            polylines: appState.isEditing ? _polylines : (appState.selectedMarker?.getPolylines ?? {}),
-            markers: appState.isEditing ? _tempMarkers : (appState.selectedMarker == null ? _markers : (appState.selectedMarker?.getMarkers ?? {})),
-            onTap: (LatLng pos) {
-              if (appState.isEditing) {
-                _addRoutePoint(pos);
-              } else {
-                setState(() {
-                  appState.setSelectedMarker(null);
-                  appState.setEditing(false);
-                });
-              }
-            },
-            onMapCreated: (GoogleMapController controller) {
-              _mapController = controller;
-              if(_mapStyle !=null){
-                print("AAAAAAAAAAAAAAAAAAAAA"*100);
-                _mapController.setMapStyle(_mapStyle!);
-              }
-            },
-            minMaxZoomPreference: MinMaxZoomPreference(10, 15),
-            cameraTargetBounds: CameraTargetBounds(istanbulBounds),
-          ),
-          Positioned(
+    return Stack(
+      children: [
+        GoogleMap(
+          initialCameraPosition: CameraPosition(target: LatLng(41.0082, 28.9784), zoom: 12),
+          polylines: appState.isEditing ? _polylines : (appState.selectedMarker?.getPolylines ?? {}),
+          markers: appState.isEditing ? _tempMarkers : (appState.selectedMarker == null ? _markers : (appState.selectedMarker?.getMarkers ?? {})),
+          onTap: (LatLng pos) {
+            if (appState.isEditing) {
+              _addRoutePoint(pos);
+            } else {
+              setState(() {
+                appState.setSelectedMarker(null);
+                appState.setEditing(false);
+              });
+            }
+          },
+          onMapCreated: (GoogleMapController controller) {
+            _mapController = controller;
+            if(_mapStyle !=null){_mapController.setMapStyle(_mapStyle!);}
+          },
+          minMaxZoomPreference: MinMaxZoomPreference(10, 15),
+          cameraTargetBounds: CameraTargetBounds(istanbulBounds),
+        ),
+        Positioned(
             top: 50,
             right: 10,
             child: RightMenu(
@@ -96,10 +85,8 @@ class _MapScreenState extends State<MapScreen> {
               undoRoute: _undoRoute,
             )
 
-          ),
-        ],
-      ),
-      bottomNavigationBar:BottomBar()
+        ),
+      ],
     );
   }
 
