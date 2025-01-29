@@ -24,16 +24,28 @@ class _MapScreenState extends State<MapScreen> {
   final Set<Polyline> _polylines = {};
   final Set<Marker> _tempMarkers = {};
 
+  late AppState appState;
+  bool _isInitialized = false;
+
   int _polyLineIdCounter = 0;
   int _markerIdCounter = 0;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialized) {
+      appState = Provider.of<AppState>(context, listen: false);
+      if (appState.markers.length == 0) {
+        appState.setEditing(true);
+      }
+      _isInitialized = true;
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     _loadMapStyle();
-    if(Provider.of<AppState>(context, listen: false).markers.length == 0){
-      Provider.of<AppState>(context, listen: false).setEditing(true);
-    }
   }
 
   Future<void> _loadMapStyle() async{
@@ -50,7 +62,6 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final appState = Provider.of<AppState>(context);
 
     return Stack(
       children: [
@@ -209,7 +220,7 @@ class _MapScreenState extends State<MapScreen> {
         },
       );
       _tempMarkers.clear();
-      Provider.of<AppState>(context, listen: false).markers.add(routeMarker!);
+      appState.markers.add(routeMarker!);
       _routePoints.clear();
       _polylines.clear();
     });
@@ -218,15 +229,15 @@ class _MapScreenState extends State<MapScreen> {
   void _onMarkerTap(RouteMarker marker) {
     setState(() {
       print("Tapped marker position: ${marker.position}");
-      Provider.of<AppState>(context, listen: false).setSelectedMarker(marker);
+      appState.setSelectedMarker(marker);
       marker.getRouteInfo();
     });
   }
 
   void _cancelEdit(){
     setState(() {
-      Provider.of<AppState>(context, listen: false).setSelectedMarker(null);
-      Provider.of<AppState>(context, listen: false).setEditing(false);
+      appState.setSelectedMarker(null);
+      appState.setEditing(false);
     });
   }
 
@@ -261,9 +272,9 @@ class _MapScreenState extends State<MapScreen> {
 
   void _deleteRoute() {
     setState(() {
-      if (Provider.of<AppState>(context, listen: false).selectedMarker != null) {
-        Provider.of<AppState>(context, listen: false).markers.remove(Provider.of<AppState>(context, listen: false).selectedMarker);
-        Provider.of<AppState>(context, listen: false).setSelectedMarker(null);
+      if (appState.selectedMarker != null) {
+        appState.markers.remove(appState.selectedMarker);
+        appState.setSelectedMarker(null);
       } else {
         _routePoints.clear();
         _tempMarkers.clear();
@@ -275,15 +286,15 @@ class _MapScreenState extends State<MapScreen> {
   void _confirmEdit(String routeName){
     setState(() {
       _addRouteMarker(_tempMarkers, _polylines , (routeName.length == 0 ? "Rota Bilgisi" : routeName));
-      Provider.of<AppState>(context, listen: false).setEditing(false);
-      Provider.of<AppState>(context, listen: false).setSelectedMarker(null);
+      appState.setEditing(false);
+      appState.setSelectedMarker(null);
     });
   }
 
   void _setEdit(){
     setState(() {
-      Provider.of<AppState>(context, listen: false).setSelectedMarker(null);
-      Provider.of<AppState>(context, listen: false).setEditing(true);
+      appState.setSelectedMarker(null);
+      appState.setEditing(true);
     });
   }
 
