@@ -2,7 +2,6 @@ import 'package:pedal_istanbul/models/routemarker.dart';
 
 class RouteInfo{
 
-  late String name;
   final String totalDistance;
   final String totalDuration;
   final int distanceValue;

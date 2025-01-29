@@ -8,6 +8,12 @@ class AppState with ChangeNotifier{
   bool _isEditing = false;
   RouteMarker? _selectedMarker;
 
+  final Set<Marker> _markers = {};
+
+
+
+  Set<Marker> get markers => _markers;
+
   bool get isEditing => _isEditing;
   RouteMarker? get selectedMarker => _selectedMarker;
   int get currentPageIndex => _currentPageIndex;
@@ -26,6 +32,8 @@ class AppState with ChangeNotifier{
     _currentPageIndex = pageIndex;
     notifyListeners();
   }
+
+
 
 
 }

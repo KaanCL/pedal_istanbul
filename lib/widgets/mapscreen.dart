@@ -22,7 +22,6 @@ class _MapScreenState extends State<MapScreen> {
   String? _mapStyle;
   final List<LatLng> _routePoints = [];
   final Set<Polyline> _polylines = {};
-  final Set<Marker> _markers = {};
   final Set<Marker> _tempMarkers = {};
 
   int _polyLineIdCounter = 0;
@@ -32,7 +31,9 @@ class _MapScreenState extends State<MapScreen> {
   void initState() {
     super.initState();
     _loadMapStyle();
-    Provider.of<AppState>(context, listen: false).setEditing(true);
+    if(Provider.of<AppState>(context, listen: false).markers.length == 0){
+      Provider.of<AppState>(context, listen: false).setEditing(true);
+    }
   }
 
   Future<void> _loadMapStyle() async{
@@ -56,7 +57,7 @@ class _MapScreenState extends State<MapScreen> {
         GoogleMap(
           initialCameraPosition: CameraPosition(target: LatLng(41.0082, 28.9784), zoom: 12),
           polylines: appState.isEditing ? _polylines : (appState.selectedMarker?.getPolylines ?? {}),
-          markers: appState.isEditing ? _tempMarkers : (appState.selectedMarker == null ? _markers : (appState.selectedMarker?.getMarkers ?? {})),
+          markers: appState.isEditing ? _tempMarkers : (appState.selectedMarker == null ? appState.markers : (appState.selectedMarker?.getMarkers ?? {})),
           onTap: (LatLng pos) {
             if (appState.isEditing) {
               _addRoutePoint(pos);
@@ -81,13 +82,76 @@ class _MapScreenState extends State<MapScreen> {
               setEdit: _setEdit,
               deleteRoute: _deleteRoute,
               cancelEdit: _cancelEdit,
-              confirmEdit: _confirmEdit,
+              confirmEdit: _showRouteNameDialog,
               undoRoute: _undoRoute,
             )
-
         ),
       ],
     );
+  }
+
+  void _showRouteNameDialog() {
+
+    String routeName = "";
+
+    showDialog(
+        context: context,
+        builder: (BuildContext context){
+          String inputText = '';
+          return AlertDialog(
+            title: Text("Rota İsmi Girin"),
+            content: TextField(
+              onChanged: (value){
+                  inputText = value;
+              },
+              decoration:InputDecoration(hintText: "Rota İsmi"),
+            ),
+            actions: <Widget>[
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey,
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(5.0),
+                  ),
+                ),
+                child: TextButton(
+                   child: Text(
+                       'İptal',
+                       style: TextStyle(
+                         color: Colors.white
+                   ),),
+                  onPressed: (){
+                     Navigator.of(context).pop();
+                  },
+                ),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(5.0),
+                  ),
+                ),
+                child: TextButton(
+                  child: Text(
+                      'Kaydet',
+                       style: TextStyle(
+                         color: Colors.white
+                       ),),
+                  onPressed: (){
+                    routeName = inputText;
+                    _confirmEdit(routeName);
+                    Navigator.of(context).pop();
+                  },
+                ),
+              )
+            ],
+          );
+        }
+    );
+
+
+
   }
 
   void _addRoutePoint(LatLng point) {
@@ -120,13 +184,13 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
-  void _addRouteMarker(Set<Marker> markers, Set<Polyline> polylines) {
+  void _addRouteMarker(Set<Marker> markers, Set<Polyline> polylines , String name) {
     setState(() {
       RouteMarker? routeMarker = null;
 
       routeMarker = RouteMarker(
         position: markers.first.position,
-        infoWindow: InfoWindow(title: "Rota Bilgisi"),
+        infoWindow: InfoWindow(title: name),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
         markers: Set.from(markers.map((m) => Marker(
           markerId: m.markerId,
@@ -144,9 +208,8 @@ class _MapScreenState extends State<MapScreen> {
           _onMarkerTap(routeMarker!);
         },
       );
-
       _tempMarkers.clear();
-      _markers.add(routeMarker!);
+      Provider.of<AppState>(context, listen: false).markers.add(routeMarker!);
       _routePoints.clear();
       _polylines.clear();
     });
@@ -199,7 +262,7 @@ class _MapScreenState extends State<MapScreen> {
   void _deleteRoute() {
     setState(() {
       if (Provider.of<AppState>(context, listen: false).selectedMarker != null) {
-        _markers.remove(Provider.of<AppState>(context, listen: false).selectedMarker);
+        Provider.of<AppState>(context, listen: false).markers.remove(Provider.of<AppState>(context, listen: false).selectedMarker);
         Provider.of<AppState>(context, listen: false).setSelectedMarker(null);
       } else {
         _routePoints.clear();
@@ -209,9 +272,9 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
-  void _confirmEdit(){
+  void _confirmEdit(String routeName){
     setState(() {
-      _addRouteMarker(_tempMarkers, _polylines);
+      _addRouteMarker(_tempMarkers, _polylines , (routeName.length == 0 ? "Rota Bilgisi" : routeName));
       Provider.of<AppState>(context, listen: false).setEditing(false);
       Provider.of<AppState>(context, listen: false).setSelectedMarker(null);
     });
