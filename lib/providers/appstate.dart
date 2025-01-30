@@ -7,10 +7,9 @@ class AppState with ChangeNotifier{
   int _currentPageIndex = 0;
   bool _isEditing = false;
   RouteMarker? _selectedMarker;
+  List<Route> routes = [];
 
   final Set<Marker> _markers = {};
-
-
 
   Set<Marker> get markers => _markers;
 

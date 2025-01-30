@@ -6,7 +6,7 @@ class RouteInfo{
   final String totalDuration;
   final int distanceValue;
   final int durationValue;
-  late String caloriesBurned;
+  late List<String> photos;
 
 
   RouteInfo({
@@ -14,7 +14,7 @@ class RouteInfo{
     required this.totalDuration ,
     required this.distanceValue,
     required this.durationValue,
-  }){calculateCalories();}
+  });
 
   factory RouteInfo.fromMap(Map<String, dynamic> map){
 
@@ -43,32 +43,8 @@ class RouteInfo{
   }
 
 
- void calculateCalories() {
-
-    double avgSpeed = (distanceValue / 1000) /  (durationValue / 3600) ;
 
 
-    double calorieRate;
-
-
-    switch (avgSpeed ~/ 5) {
-      case 0:
-      case 1:
-      case 2:
-        calorieRate = 4;
-        break;
-      case 3:
-        calorieRate = 7;
-        break;
-      case 4:
-        calorieRate = 10;
-        break;
-      default:
-        calorieRate = 14;
-    }
-
-    caloriesBurned = "${calorieRate * (durationValue / 60)}";
-  }
 
 
 }

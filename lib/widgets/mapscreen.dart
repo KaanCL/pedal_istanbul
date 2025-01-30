@@ -1,10 +1,15 @@
+import 'dart:ui';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:pedal_istanbul/models/route.dart';
 import 'package:pedal_istanbul/models/routemarker.dart';
 import 'package:pedal_istanbul/providers/appstate.dart';
+import 'package:pedal_istanbul/respository/directions_respository.dart';
+import 'package:pedal_istanbul/views/routes.dart';
 import 'package:pedal_istanbul/widgets/bottombar.dart';
 import 'package:pedal_istanbul/widgets/menubutton.dart';
 import 'package:pedal_istanbul/widgets/rightmenu.dart';
@@ -25,7 +30,7 @@ class _MapScreenState extends State<MapScreen> {
   final Set<Marker> _tempMarkers = {};
 
   late AppState appState;
-  bool _isInitialized = false;
+  bool _appStateIsInitialized = false;
 
   int _polyLineIdCounter = 0;
   int _markerIdCounter = 0;
@@ -33,12 +38,12 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!_isInitialized) {
+    if (!_appStateIsInitialized) {
       appState = Provider.of<AppState>(context, listen: false);
       if (appState.markers.length == 0) {
         appState.setEditing(true);
       }
-      _isInitialized = true;
+      _appStateIsInitialized = true;
     }
   }
 
@@ -47,6 +52,8 @@ class _MapScreenState extends State<MapScreen> {
     super.initState();
     _loadMapStyle();
   }
+
+
 
   Future<void> _loadMapStyle() async{
     String style = await rootBundle.loadString('assets/mapstyle/mapstyle.json');
@@ -230,7 +237,6 @@ class _MapScreenState extends State<MapScreen> {
     setState(() {
       print("Tapped marker position: ${marker.position}");
       appState.setSelectedMarker(marker);
-      marker.getRouteInfo();
     });
   }
 
@@ -297,5 +303,7 @@ class _MapScreenState extends State<MapScreen> {
       appState.setEditing(true);
     });
   }
+
+
 
 }

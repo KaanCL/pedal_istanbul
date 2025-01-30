@@ -60,17 +60,5 @@ import 'package:pedal_istanbul/respository/directions_respository.dart';
     }
 
 
-    Future<void> getRouteInfo() async{
-
-      try{
-        final Direction = await DirectionsRepository().getRouteInfo(
-            origin: markers.first.position,
-            destination: markers.last.position);
-          print("${Direction.totalDistance} " + " ${Direction.totalDuration} " +" ${Direction.caloriesBurned} " );
-         }catch(e){
-        print(e.toString());
-      }
-
-    }
 
   }
