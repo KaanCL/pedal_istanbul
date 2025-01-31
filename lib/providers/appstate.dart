@@ -2,14 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:pedal_istanbul/models/routemarker.dart';
 
+import '../models/routedata.dart';
+
 class AppState with ChangeNotifier{
 
   int _currentPageIndex = 0;
   bool _isEditing = false;
   RouteMarker? _selectedMarker;
-  List<Route> routes = [];
+  List<RouteData> routes = [];
 
   final Set<Marker> _markers = {};
+
 
   Set<Marker> get markers => _markers;
 
@@ -27,10 +30,12 @@ class AppState with ChangeNotifier{
     notifyListeners();
   }
 
-  void setCurrentPageIndex (int pageIndex){
+  void setCurrentPageIndex(int pageIndex) {
     _currentPageIndex = pageIndex;
     notifyListeners();
   }
+
+
 
 
 

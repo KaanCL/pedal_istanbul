@@ -1,11 +1,10 @@
 import 'dart:ui';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:pedal_istanbul/models/route.dart';
+import 'package:pedal_istanbul/models/routedata.dart';
 import 'package:pedal_istanbul/models/routemarker.dart';
 import 'package:pedal_istanbul/providers/appstate.dart';
 import 'package:pedal_istanbul/respository/directions_respository.dart';
@@ -54,13 +53,25 @@ class _MapScreenState extends State<MapScreen> {
   }
 
 
+  @override
+  void dispose() {
+    _mapController.dispose();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      appState.setSelectedMarker(null);
+    });
 
-  Future<void> _loadMapStyle() async{
+    super.dispose();
+  }
+
+  @override
+  Future<void> _loadMapStyle() async {
     String style = await rootBundle.loadString('assets/mapstyle/mapstyle.json');
+    if (!mounted) return;
     setState(() {
       _mapStyle = style;
     });
   }
+
 
   final LatLngBounds istanbulBounds = LatLngBounds(
     southwest: LatLng(40.8024, 28.5245),
@@ -226,6 +237,7 @@ class _MapScreenState extends State<MapScreen> {
           _onMarkerTap(routeMarker!);
         },
       );
+  
       _tempMarkers.clear();
       appState.markers.add(routeMarker!);
       _routePoints.clear();
@@ -234,12 +246,8 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _onMarkerTap(RouteMarker marker) {
-    setState(() {
-      print("Tapped marker position: ${marker.position}");
       appState.setSelectedMarker(marker);
-    });
   }
-
   void _cancelEdit(){
     setState(() {
       appState.setSelectedMarker(null);

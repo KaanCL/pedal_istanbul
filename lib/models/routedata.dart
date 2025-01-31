@@ -2,7 +2,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:pedal_istanbul/respository/directions_respository.dart';
 
-class Route {
+class RouteData {
+  final int id;
   final String name;
   final LatLng origin;
   final LatLng destination;
@@ -11,15 +12,16 @@ class Route {
   int distanceValue = 0;
   int durationValue = 0;
   String caloriesBurned = "0";
-  final List<LatLng> routePoints;
+  final Set<Marker> routePoints;
   List<String> photos = [];
 
-  Route(
+  RouteData(
+      this.id,
       this.name,
       this.origin,
       this.destination,
       this.routePoints,
-      );
+      ){getRouteInfo();getStreetViewUrls();}
 
   Future<void> getRouteInfo() async {
     try {
@@ -65,7 +67,7 @@ class Route {
 
   void getStreetViewUrls() {
     photos = routePoints.map((e) {
-      return "https://maps.googleapis.com/maps/api/streetview?size=600x300&location=${e.latitude},${e.longitude}&key=${dotenv.env['GOOGLE_API_KEY']}";
+      return "https://maps.googleapis.com/maps/api/streetview?size=600x300&location=${e.position.latitude},${e.position.longitude}&key=${dotenv.env['GOOGLE_API_KEY']}";
     }).toList();
   }
 }
