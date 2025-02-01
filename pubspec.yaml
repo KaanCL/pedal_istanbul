@@ -41,6 +41,7 @@ dependencies:
   flutter_polyline_points: ^2.1.0
   flutter_dotenv: ^5.0.2
   provider: ^6.0.0
+  cached_network_image: ^3.2.0
 
 dev_dependencies:
   flutter_test:
@@ -75,8 +76,10 @@ flutter:
     - assets/images/home.png
     - assets/images/routes.png
     - assets/images/chatbot.png
-    - assets/images/favorites.png
     - assets/mapstyle/mapstyle.json
+    - assets/images/favoriteicon.png
+    - assets/images/unfavoriteicon.png
+
 
 
       # An image asset can refer to one or more resolution-specific "variants", see

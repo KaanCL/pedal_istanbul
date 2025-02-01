@@ -24,7 +24,7 @@ class BottomBar extends StatelessWidget {
             label: "Chatbot",
         ),
         BottomNavigationBarItem(
-            icon: BottomBarButton(img:Image.asset("assets/images/favorites.png")),
+            icon: BottomBarButton(img:Image.asset("assets/images/unfavoriteicon.png")),
             label: "Favorites",
         ),
 

@@ -10,6 +10,7 @@ import 'package:pedal_istanbul/providers/appstate.dart';
 import 'package:pedal_istanbul/respository/directions_respository.dart';
 import 'package:pedal_istanbul/views/routes.dart';
 import 'package:pedal_istanbul/widgets/bottombar.dart';
+import 'package:pedal_istanbul/widgets/bottomdragwidget.dart';
 import 'package:pedal_istanbul/widgets/menubutton.dart';
 import 'package:pedal_istanbul/widgets/rightmenu.dart';
 import 'package:provider/provider.dart';
@@ -27,6 +28,7 @@ class _MapScreenState extends State<MapScreen> {
   final List<LatLng> _routePoints = [];
   final Set<Polyline> _polylines = {};
   final Set<Marker> _tempMarkers = {};
+
 
   late AppState appState;
   bool _appStateIsInitialized = false;
@@ -115,8 +117,10 @@ class _MapScreenState extends State<MapScreen> {
               undoRoute: _undoRoute,
             )
         ),
+        BottomDragWidget(),
       ],
     );
+
   }
 
   void _showRouteNameDialog() {
@@ -213,9 +217,10 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
-  void _addRouteMarker(Set<Marker> markers, Set<Polyline> polylines , String name) {
+  void _addRouteMarker(Set<Marker> markers, Set<Polyline> polylines , List<LatLng> routePoints , String name) {
     setState(() {
       RouteMarker? routeMarker = null;
+      RouteData? routeData = null;
 
       routeMarker = RouteMarker(
         position: markers.first.position,
@@ -227,6 +232,7 @@ class _MapScreenState extends State<MapScreen> {
           infoWindow: m.infoWindow,
           icon: m.icon,
         ))),
+        routePos: routePoints,
         polylines: Set.from(polylines.map((p) => Polyline(
           polylineId: p.polylineId,
           points: List<LatLng>.from(p.points),
@@ -234,19 +240,19 @@ class _MapScreenState extends State<MapScreen> {
           width: p.width,
         ))),
         onTap: () {
-          _onMarkerTap(routeMarker!);
+          _onMarkerTap(routeData!);
         },
       );
-  
+      routeData = RouteData(name,routeMarker) ;
       _tempMarkers.clear();
-      appState.markers.add(routeMarker!);
+      appState.markers.add(routeMarker);
       _routePoints.clear();
       _polylines.clear();
     });
   }
 
-  void _onMarkerTap(RouteMarker marker) {
-      appState.setSelectedMarker(marker);
+  void _onMarkerTap(RouteData route) {
+      appState.setSelectedMarker(route);
   }
   void _cancelEdit(){
     setState(() {
@@ -299,7 +305,7 @@ class _MapScreenState extends State<MapScreen> {
 
   void _confirmEdit(String routeName){
     setState(() {
-      _addRouteMarker(_tempMarkers, _polylines , (routeName.length == 0 ? "Rota Bilgisi" : routeName));
+      _addRouteMarker(_tempMarkers, _polylines , _routePoints ,(routeName.length == 0 ? "Rota Bilgisi" : routeName));
       appState.setEditing(false);
       appState.setSelectedMarker(null);
     });

@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:pedal_istanbul/models/routeinfo.dart';
+import 'package:pedal_istanbul/models/direction.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class  DirectionsRepository{
@@ -11,7 +11,7 @@ class  DirectionsRepository{
 
   DirectionsRepository({Dio? dio}) : _dio = dio ?? Dio();
 
-  Future<RouteInfo> getRouteInfo({
+  Future<Direction> getRouteInfo({
     required LatLng origin,
     required LatLng destination,})async{
 
@@ -22,7 +22,7 @@ class  DirectionsRepository{
     });
 
     if (response.statusCode == 200){
-         return RouteInfo.fromMap(response.data);
+         return Direction.fromMap(response.data);
     }
     throw  Exception('Failed to fetch directions');
 

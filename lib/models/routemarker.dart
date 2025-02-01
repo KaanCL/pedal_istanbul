@@ -7,6 +7,7 @@ import 'package:pedal_istanbul/respository/directions_respository.dart';
   class RouteMarker extends Marker {
     Set<Marker> markers;
     Set<Polyline> polylines;
+    List<LatLng> routePos;
     static int _idCounter = 0;
     final int id;
 
@@ -29,6 +30,7 @@ import 'package:pedal_istanbul/respository/directions_respository.dart';
       void Function(LatLng)? onDragEnd,
       required this.markers,
       required this.polylines,
+      required this.routePos,
     })
         : id = _idCounter++,
           super(
@@ -59,6 +61,9 @@ import 'package:pedal_istanbul/respository/directions_respository.dart';
         return polylines;
     }
 
+    List<LatLng> get getRoutePos{
+      return routePos;
+    }
 
 
   }

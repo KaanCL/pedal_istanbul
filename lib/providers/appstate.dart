@@ -8,7 +8,7 @@ class AppState with ChangeNotifier{
 
   int _currentPageIndex = 0;
   bool _isEditing = false;
-  RouteMarker? _selectedMarker;
+  RouteData? _selectedMarker;
   List<RouteData> routes = [];
 
   final Set<Marker> _markers = {};
@@ -17,7 +17,7 @@ class AppState with ChangeNotifier{
   Set<Marker> get markers => _markers;
 
   bool get isEditing => _isEditing;
-  RouteMarker? get selectedMarker => _selectedMarker;
+  RouteData? get selectedMarker => _selectedMarker;
   int get currentPageIndex => _currentPageIndex;
 
   void setEditing(bool editing) {
@@ -25,8 +25,8 @@ class AppState with ChangeNotifier{
     notifyListeners();
   }
 
-  void setSelectedMarker(RouteMarker? marker) {
-    _selectedMarker = marker;
+  void setSelectedMarker(RouteData? route) {
+    _selectedMarker = route;
     notifyListeners();
   }
 
