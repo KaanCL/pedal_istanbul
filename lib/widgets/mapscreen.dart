@@ -293,7 +293,7 @@ class _MapScreenState extends State<MapScreen> {
   void _deleteRoute() {
     setState(() {
       if (appState.selectedMarker != null) {
-        appState.markers.remove(appState.selectedMarker);
+        appState.markers.remove(appState.selectedMarker!.routeMarker);
         appState.setSelectedMarker(null);
       } else {
         _routePoints.clear();

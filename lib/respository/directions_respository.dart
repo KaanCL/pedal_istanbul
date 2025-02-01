@@ -11,7 +11,7 @@ class  DirectionsRepository{
 
   DirectionsRepository({Dio? dio}) : _dio = dio ?? Dio();
 
-  Future<Direction> getRouteInfo({
+  Future<Direction> getDirection({
     required LatLng origin,
     required LatLng destination,})async{
 

@@ -6,9 +6,9 @@ import 'package:pedal_istanbul/respository/directions_respository.dart';
 class RouteData {
   final String name;
   bool isFavorite = false;
-  final RouteMarker? routeMarker;
-  String destinationAddress = "";
-  String originAddress = "";
+  final RouteMarker routeMarker;
+  String startAddress = "";
+  String endAddress = "";
   String totalDistance = "0 km";
   String totalDuration = "0 min";
   int distanceValue = 0;
@@ -16,35 +16,35 @@ class RouteData {
   String caloriesBurned = "0 kcal";
   List<String> photos = [];
 
-  LatLng origin = LatLng(0, 0);
-  LatLng destination = LatLng(0, 0);
   List<LatLng> routePos = [];
 
   RouteData(this.name, this.routeMarker) {
-    if (routeMarker != null) {
-      origin = routeMarker!.getMarkers.first.position;
-      destination = routeMarker!.getMarkers.last.position;
       routePos = routeMarker!.getRoutePos;
       getRouteInfo();
       getStreetViewUrls();
-    }
   }
 
+
   Future<void> getRouteInfo() async {
+
+    LatLng origin = routeMarker.getMarkers.first.position;
+    LatLng destination = routeMarker.getMarkers.last.position;
     if (routeMarker == null) return;
 
     try {
-      final direction = await DirectionsRepository().getRouteInfo(
-        origin: origin,
+      final direction = await DirectionsRepository().getDirection(
+        origin:origin,
         destination: destination,
       );
 
+      startAddress = direction.startAddress;
+      endAddress = direction.endAddress;
       totalDistance = direction.totalDistance;
       totalDuration = direction.totalDuration;
       distanceValue = direction.distanceValue;
       durationValue = direction.durationValue;
 
-      calculateCalories(); // Kalori hesaplamasını burada yap
+      calculateCalories();
     } catch (e) {
       print("Hata: ${e.toString()}");
     }
@@ -83,7 +83,6 @@ class RouteData {
       photos = [];
       return;
     }
-
     photos = routePos.map((e) {
       return "https://maps.googleapis.com/maps/api/streetview?size=600x300&location=${e.latitude},${e.longitude}&key=${dotenv.env['GOOGLE_API_KEY']}";
     }).toList();

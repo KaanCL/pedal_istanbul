@@ -16,9 +16,10 @@ class BottomDragWidget extends StatelessWidget {
       return SizedBox.shrink();
     }
 
+
     return DraggableScrollableSheet(
-      initialChildSize: 0.12,
-      minChildSize: 0.12,
+      initialChildSize: 0.14,
+      minChildSize: 0.14,
       maxChildSize: 0.3,
       builder: (BuildContext context, ScrollController scrollController) {
         return Container(
@@ -55,8 +56,9 @@ class BottomDragWidget extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: InkWell(
-                          onTap: () {
-                            routeData.isFavorite = true;
+                          onTap: (){
+
+                            routeData.isFavorite = !routeData.isFavorite;
                           },
                           child: Image.asset(
                             routeData.isFavorite ?'assets/images/favoriteicon.png' : 'assets/images/unfavoriteicon.png',
@@ -79,7 +81,7 @@ class BottomDragWidget extends StatelessWidget {
                 Padding(
                   padding: EdgeInsets.only(left: 20, top: 10),
                   child: Text(
-                    routeData.originAddress, 
+                    routeData.startAddress,
                     style: TextStyle(
                       fontSize: 14,
                       color: Color(0xff797878),
