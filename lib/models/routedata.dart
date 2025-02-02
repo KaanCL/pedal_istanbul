@@ -1,3 +1,4 @@
+
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:pedal_istanbul/models/routemarker.dart';
@@ -12,7 +13,7 @@ class RouteData {
   String totalDistance = "0 km";
   String totalDuration = "0 min";
   int distanceValue = 0;
-  int durationValue = 0;
+  double durationValue = 0;
   String caloriesBurned = "0 kcal";
   List<String> photos = [];
 
@@ -40,9 +41,10 @@ class RouteData {
       startAddress = direction.startAddress;
       endAddress = direction.endAddress;
       totalDistance = direction.totalDistance;
-      totalDuration = direction.totalDuration;
       distanceValue = direction.distanceValue;
-      durationValue = direction.durationValue;
+      durationValue = (direction.durationValue / 3);
+      totalDuration = "${(durationValue / 120).toInt()} mins";
+
 
       calculateCalories();
     } catch (e) {
@@ -55,27 +57,23 @@ class RouteData {
       caloriesBurned = "0 kcal";
       return;
     }
+    double distanceInKm = distanceValue / 1000;
+    double avgSpeed = (distanceInKm) / (durationValue / 3600);
+    double caloriesPerHour;
 
-    double avgSpeed = (distanceValue / 1000) / (durationValue / 3600);
-    double calorieRate;
-
-    switch (avgSpeed ~/ 5) {
-      case 0:
-      case 1:
-      case 2:
-        calorieRate = 4;
-        break;
-      case 3:
-        calorieRate = 7;
-        break;
-      case 4:
-        calorieRate = 10;
-        break;
-      default:
-        calorieRate = 14;
+    if (avgSpeed < 15) {
+      caloriesPerHour = 280;
+    } else if (avgSpeed < 20) {
+      caloriesPerHour = 400;
+    } else if (avgSpeed < 25) {
+      caloriesPerHour = 600;
+    } else {
+      caloriesPerHour = 800;
     }
 
-    caloriesBurned = "${(calorieRate * (durationValue / 60)).toStringAsFixed(2)} kcal";
+    double calories = (caloriesPerHour / 60) * (durationValue / 60);
+
+    caloriesBurned = "${calories.toStringAsFixed(1)} kcal";
   }
 
   void getStreetViewUrls() {

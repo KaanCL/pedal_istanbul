@@ -16,27 +16,27 @@ class Direction {
   });
 
   factory Direction.fromMap(Map<String, dynamic> map) {
-    // routes listesinin boş olup olmadığını kontrol et
+
+    print(map);
     if ((map['routes'] as List).isEmpty) {
       throw Exception("No routes found");
     }
 
-    // İlk route'u al
+
     final route = map['routes'][0];
 
-    // legs listesinin boş olup olmadığını kontrol et
     if ((route['legs'] as List).isEmpty) {
       throw Exception("No legs found");
     }
 
-    // İlk leg'i al
+
     final leg = route['legs'][0];
 
-    // start_address ve end_address'i al
+
     final startAddress = leg['start_address'] ?? 'Unknown';
     final endAddress = leg['end_address'] ?? 'Unknown';
 
-    // distance ve duration bilgilerini al
+
     final distance = leg['distance']['text'] ?? '0 km';
     final duration = leg['duration']['text'] ?? '0 mins';
     final distanceValue = leg['distance']['value'] ?? 0;

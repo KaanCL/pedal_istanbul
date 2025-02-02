@@ -245,7 +245,7 @@ class _MapScreenState extends State<MapScreen> {
       );
       routeData = RouteData(name,routeMarker) ;
       _tempMarkers.clear();
-      appState.markers.add(routeMarker);
+      appState.markers.add(routeData.routeMarker);
       _routePoints.clear();
       _polylines.clear();
     });

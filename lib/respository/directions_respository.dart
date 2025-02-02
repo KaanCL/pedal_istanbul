@@ -18,6 +18,7 @@ class  DirectionsRepository{
     final response = await _dio.get(_baseUrl,queryParameters:{
       'origin':'${origin.latitude},${origin.longitude}',
       'destination':'${destination.latitude},${destination.longitude}',
+      'mode':'walking',
       'key':'${dotenv.env['GOOGLE_API_KEY']}'
     });
 

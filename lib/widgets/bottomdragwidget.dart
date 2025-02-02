@@ -4,18 +4,21 @@ import 'package:pedal_istanbul/models/routedata.dart';
 import 'package:provider/provider.dart';
 import 'package:pedal_istanbul/providers/appstate.dart';
 
-class BottomDragWidget extends StatelessWidget {
+class BottomDragWidget extends StatefulWidget {
   const BottomDragWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  _BottomDragWidgetState createState() => _BottomDragWidgetState();
+}
 
+class _BottomDragWidgetState extends State<BottomDragWidget> {
+  @override
+  Widget build(BuildContext context) {
     final routeData = Provider.of<AppState>(context).selectedMarker;
 
     if (routeData == null) {
       return SizedBox.shrink();
     }
-
 
     return DraggableScrollableSheet(
       initialChildSize: 0.14,
@@ -56,12 +59,13 @@ class BottomDragWidget extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: InkWell(
-                          onTap: (){
-
-                            routeData.isFavorite = !routeData.isFavorite;
+                          onTap: () {
+                            setState(() {
+                              routeData.isFavorite = !routeData.isFavorite;
+                            });
                           },
                           child: Image.asset(
-                            routeData.isFavorite ?'assets/images/favoriteicon.png' : 'assets/images/unfavoriteicon.png',
+                            routeData.isFavorite ? 'assets/images/favoriteicon.png' : 'assets/images/unfavoriteicon.png',
                             width: 20,
                             height: 20,
                           ),
