@@ -243,7 +243,11 @@ class _MapScreenState extends State<MapScreen> {
           _onMarkerTap(routeData!);
         },
       );
-      routeData = RouteData(name,routeMarker) ;
+      routeData = RouteData(
+          name : name,
+          routeMarker : routeMarker,
+          isDirectionDataFetched: false
+          ) ;
       _tempMarkers.clear();
       appState.markers.add(routeData.routeMarker);
       _routePoints.clear();

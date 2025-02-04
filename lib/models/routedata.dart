@@ -8,6 +8,7 @@ class RouteData {
   final String name;
   bool isFavorite = false;
   final RouteMarker routeMarker;
+  final bool isDirectionDataFetched;
   String startAddress = "";
   String endAddress = "";
   String totalDistance = "0 km";
@@ -19,12 +20,47 @@ class RouteData {
 
   List<LatLng> routePos = [];
 
-  RouteData(this.name, this.routeMarker) {
-      routePos = routeMarker!.getRoutePos;
-      getRouteInfo();
-      getStreetViewUrls();
+  RouteData({
+    required this.name,
+    required this.routeMarker,
+    required this.isDirectionDataFetched,
+    this.isFavorite = false,
+    this.startAddress = "",
+    this.endAddress = "",
+    this.totalDistance = "0 km",
+    this.totalDuration = "0 min",
+    this.distanceValue = 0,
+    this.durationValue = 0.0,
+    this.caloriesBurned = "0 kcal",
+    this.photos = const [],
+  }) {
+    routePos = routeMarker.getRoutePos;
+    if(!isDirectionDataFetched){getRouteInfo();}
+    getStreetViewUrls();
   }
 
+
+
+  factory RouteData.fromJson(Map<String,dynamic> json){
+
+    RouteMarker routeMarker = RouteMarker.fromJson(json['routeMarker']);
+
+    return RouteData(
+      name: json['name'],
+      routeMarker: routeMarker,
+      isDirectionDataFetched: true,
+      isFavorite: json['isFavorite'] ?? false,
+      startAddress: json['startAddress'] ?? "",
+      endAddress: json['endAddress'] ?? "",
+      totalDistance: json['totalDistance'] ?? "0 km",
+      totalDuration: json['totalDuration'] ?? "0 min",
+      distanceValue: json['distanceValue'] ?? 0,
+      durationValue: json['durationValue']?.toDouble() ?? 0.0,
+      caloriesBurned: json['calorie'] ?? "0 kcal",
+      photos: List<String>.from(json['photos'] ?? []),
+    );
+
+  }
 
   Future<void> getRouteInfo() async {
 
