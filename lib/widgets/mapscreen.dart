@@ -8,6 +8,7 @@ import 'package:pedal_istanbul/models/routedata.dart';
 import 'package:pedal_istanbul/models/routemarker.dart';
 import 'package:pedal_istanbul/providers/appstate.dart';
 import 'package:pedal_istanbul/respository/directions_respository.dart';
+import 'package:pedal_istanbul/respository/routes_respository.dart';
 import 'package:pedal_istanbul/views/routes.dart';
 import 'package:pedal_istanbul/widgets/bottombar.dart';
 import 'package:pedal_istanbul/widgets/bottomdragwidget.dart';
@@ -44,8 +45,9 @@ class _MapScreenState extends State<MapScreen> {
       if (appState.markers.length == 0) {
         appState.setEditing(true);
       }
-      _appStateIsInitialized = true;
     }
+    appState.fetchRoutes();
+    print(appState.markers.first.position);
   }
 
   @override
@@ -53,6 +55,7 @@ class _MapScreenState extends State<MapScreen> {
     super.initState();
     _loadMapStyle();
   }
+
 
 
   @override

@@ -91,7 +91,10 @@ import 'package:pedal_istanbul/respository/directions_respository.dart';
       return RouteMarker(
         markers: markers,
         polylines: polylines,
-        routePos: routePos
+        position: markers.first.position,
+        routePos: routePos,
+        icon:BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
+        infoWindow: InfoWindow(title: json['name'])
       );
 
     }
