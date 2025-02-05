@@ -12,7 +12,7 @@ class RoutesRespository{
 
   Future<List<RouteData>> getRoutes() async{
 
-    final response = await _dio.get(_baseUrl +"route/");
+    final response = await _dio.get(_baseUrl +"route");
 
     if(response.statusCode == 200){
       List<dynamic> jsonResponse = response.data;
@@ -20,6 +20,17 @@ class RoutesRespository{
       return jsonResponse.map((route)=>RouteData.fromJson(route)).toList();
     }
     throw  Exception('Failed to fetch routes');
+  }
+
+
+  Future<void> postRoutes(Map<String,dynamic> routeData) async {
+    final response = await _dio.post(_baseUrl + "route/", data: routeData);
+
+    if (response.statusCode == 201) {
+      print('Route created: ${response.data}');
+    } else {
+      throw Exception('Failed to post routes');
+    }
   }
 
 }

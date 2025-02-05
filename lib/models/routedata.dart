@@ -7,7 +7,7 @@ import 'package:pedal_istanbul/respository/directions_respository.dart';
 class RouteData {
   final String name;
   bool isFavorite = false;
-  final RouteMarker routeMarker;
+ RouteMarker routeMarker;
   final bool isDirectionDataFetched;
   String startAddress = "";
   String endAddress = "";
@@ -35,17 +35,20 @@ class RouteData {
     this.photos = const [],
   }) {
     routePos = routeMarker.getRoutePos;
-    if(!isDirectionDataFetched){getRouteInfo();}
-    getStreetViewUrls();
-  }
+    if(!isDirectionDataFetched){getRouteInfo();getStreetViewUrls()}
 
+  }
 
 
   factory RouteData.fromJson(Map<String,dynamic> json){
 
+
+    RouteData? routeData = null;
+
+
     RouteMarker routeMarker = RouteMarker.fromJson(json['routeMarker']);
 
-    return RouteData(
+    routeData = RouteData(
       name: json['name'],
       routeMarker: routeMarker,
       isDirectionDataFetched: true,
@@ -58,8 +61,28 @@ class RouteData {
       durationValue: json['durationValue']?.toDouble() ?? 0.0,
       caloriesBurned: json['calorie'] ?? "0 kcal",
       photos: List<String>.from(json['photos'] ?? []),
+
     );
 
+
+    return routeData;
+
+  }
+
+  Map<String,dynamic> toJson() {
+    return {
+      'name': name,
+      'routeMarker': routeMarker.toJson(),
+      'isFavorite': isFavorite,
+      'startAddress': startAddress,
+      'endAddress': endAddress,
+      'totalDistance': totalDistance,
+      'totalDuration': totalDuration,
+      'distanceValue': distanceValue,
+      'durationValue': durationValue,
+      'calorie': caloriesBurned,
+      'photos': photos,
+    };
   }
 
   Future<void> getRouteInfo() async {
@@ -87,6 +110,10 @@ class RouteData {
       print("Hata: ${e.toString()}");
     }
   }
+
+
+
+
 
   void calculateCalories() {
     if (durationValue == 0 || distanceValue == 0) {

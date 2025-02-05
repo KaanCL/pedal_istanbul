@@ -242,7 +242,7 @@ class _MapScreenState extends State<MapScreen> {
           color: p.color,
           width: p.width,
         ))),
-        onTap: () {
+        onTapCallBack: () {
           _onMarkerTap(routeData!);
         },
       );
@@ -253,6 +253,7 @@ class _MapScreenState extends State<MapScreen> {
           ) ;
       _tempMarkers.clear();
       appState.markers.add(routeData.routeMarker);
+      appState.postRoutes(routeData.modelJson!);
       _routePoints.clear();
       _polylines.clear();
     });

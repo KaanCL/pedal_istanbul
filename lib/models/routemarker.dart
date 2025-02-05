@@ -1,7 +1,11 @@
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:pedal_istanbul/models/routedata.dart';
+import 'package:pedal_istanbul/providers/appstate.dart';
 import 'package:pedal_istanbul/respository/directions_respository.dart';
+import 'package:provider/provider.dart';
 
 
   class RouteMarker extends Marker {
@@ -10,6 +14,8 @@ import 'package:pedal_istanbul/respository/directions_respository.dart';
     List<LatLng> routePos;
     static int _idCounter = 0;
     final int id;
+
+    void Function() onTapCallBack;
 
     RouteMarker({
       double alpha = 1.0,
@@ -24,13 +30,14 @@ import 'package:pedal_istanbul/respository/directions_respository.dart';
       bool visible = true,
       double zIndex = 0.0,
       String? clusterManagerId,
-      void Function()? onTap,
       void Function(LatLng)? onDrag,
       void Function(LatLng)? onDragStart,
       void Function(LatLng)? onDragEnd,
       required this.markers,
       required this.polylines,
       required this.routePos,
+      required this.onTapCallBack
+
     })
         : id = _idCounter++,
           super(
@@ -38,7 +45,6 @@ import 'package:pedal_istanbul/respository/directions_respository.dart';
           alpha: alpha,
           anchor: anchor,
           consumeTapEvents: consumeTapEvents,
-
           draggable: draggable,
           flat: flat,
           icon: icon,
@@ -47,7 +53,7 @@ import 'package:pedal_istanbul/respository/directions_respository.dart';
           rotation: rotation,
           visible: visible,
           zIndex: zIndex,
-          onTap: onTap,
+          onTap: onTapCallBack,
           onDrag: onDrag,
           onDragStart: onDragStart,
           onDragEnd: onDragEnd,
@@ -68,6 +74,8 @@ import 'package:pedal_istanbul/respository/directions_respository.dart';
 
    factory RouteMarker.fromJson(Map<String,dynamic> json){
 
+      RouteMarker? routermarker = null;
+
       Set<Marker> markers = (json['markers'] as List)
           .map((marker)=>Marker(
              markerId: MarkerId(marker['_id']),
@@ -82,23 +90,57 @@ import 'package:pedal_istanbul/respository/directions_respository.dart';
                 points: (polyline['points'] as List)
                     .map((point) => LatLng(point['lat'], point['lng']))
                     .toList(),
+                color: Colors.blue,
+                width: 5,
       )).toSet();
 
       List<LatLng> routePos = (json['routePos'] as List)
           .map((pos) => LatLng(pos['lat'], pos['lng']))
           .toList();
 
-      return RouteMarker(
-        markers: markers,
-        polylines: polylines,
-        position: markers.first.position,
-        routePos: routePos,
-        icon:BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
-        infoWindow: InfoWindow(title: json['name'])
-      );
+      routermarker =RouteMarker(
+          markers: markers,
+          polylines: polylines,
+          position: markers.first.position,
+          routePos: routePos,
+          icon:BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
+          onTapCallBack: (){},
+          infoWindow: InfoWindow(title: json['name']),);
 
+      return routermarker;
     }
 
+    Map<String, dynamic> toJson() {
+      return {
+        'markers': markers.map((marker) {
+          return {
+            'type': marker == markers.first ? true : false,
+            'position': {
+              'lat': marker.position.latitude,
+              'lng': marker.position.longitude,
+            },
+          };
+        }).toList(),
+
+        'polylines': polylines.map((polyline) {
+          return {
+            'points': polyline.points.map((point) {
+              return {
+                'lat': point.latitude,
+                'lng': point.longitude,
+              };
+            }).toList(),
+          };
+        }).toList(),
+
+        'routePos': routePos.map((routePos) {
+          return {
+            'lat': routePos.latitude,
+            'lng': routePos.longitude,
+          };
+        }).toList(),
+      };
+    }
 
 
   }

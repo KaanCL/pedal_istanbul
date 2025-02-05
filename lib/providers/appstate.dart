@@ -9,6 +9,7 @@ class AppState with ChangeNotifier{
 
   int _currentPageIndex = 0;
   bool _isEditing = false;
+
   RouteData? _selectedMarker;
   List<RouteData> routes = [];
 
@@ -44,13 +45,18 @@ class AppState with ChangeNotifier{
   Future<void> fetchRoutes() async{
     try{
       List<RouteData> fetchedRoutes = await RoutesRespository().getRoutes();
-
       routes = fetchedRoutes;
-
-
       _markers.clear();
-
       for(var route in routes){
+        route.routeMarker = RouteMarker(
+          markers: route.routeMarker.getMarkers,
+          polylines: route.routeMarker.getPolylines,
+          routePos: route.routeMarker.getRoutePos,
+          position: route.routeMarker.position,
+          icon: route.routeMarker.icon,
+          infoWindow: route.routeMarker.infoWindow,
+          onTapCallBack: () {setSelectedMarker(route);},
+        );
         print(route.routeMarker.position);
         _markers.add(route.routeMarker);
       }
@@ -59,14 +65,21 @@ class AppState with ChangeNotifier{
       print("Hata: $e");
 
     }
-
-
   }
 
 
+  Future<void> postRoutes(Map<String,dynamic> routeData)async{
 
+    print(routeData);
 
+    try{
+      await RoutesRespository().postRoutes(routeData);
+      notifyListeners();
+    }catch(e){
+      print("Hata: $e");
+    }
 
+  }
 
 
 }
