@@ -252,7 +252,10 @@ class _MapScreenState extends State<MapScreen> {
           ) ;
       _tempMarkers.clear();
       appState.markers.add(routeData.routeMarker);
-      appState.postRoutes(routeData.toJson());
+      routeData.toJsonAsync().then((json){
+        appState.postRoutes(json);
+        });
+
       _routePoints.clear();
       _polylines.clear();
     });

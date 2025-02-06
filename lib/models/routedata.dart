@@ -17,8 +17,9 @@ class RouteData {
   double durationValue = 0;
   String caloriesBurned = "0 kcal";
   List<String> photos = [];
-
   List<LatLng> routePos = [];
+
+
 
   RouteData({
     required this.name,
@@ -35,17 +36,27 @@ class RouteData {
     this.photos = const [],
   }) {
     routePos = routeMarker.getRoutePos;
-    if(!isDirectionDataFetched){getRouteInfo();getStreetViewUrls();};
+    initialize();
 
   }
 
 
+
+  Future<void> initialize() async{
+    if (!isDirectionDataFetched) {
+      getStreetViewUrls();
+      await getRouteInfo();
+    }
+}
+
+  Future<Map<String, dynamic>> toJsonAsync() async {
+    await initialize() ;
+    return toJson();
+  }
+
+
   factory RouteData.fromJson(Map<String,dynamic> json){
-
-
     RouteData? routeData = null;
-
-
     RouteMarker routeMarker = RouteMarker.fromJson(json['routeMarker']);
 
     routeData = RouteData(
