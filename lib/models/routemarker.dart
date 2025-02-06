@@ -37,7 +37,6 @@ import 'package:provider/provider.dart';
       required this.polylines,
       required this.routePos,
       required this.onTapCallBack
-
     })
         : id = _idCounter++,
           super(
@@ -112,16 +111,22 @@ import 'package:provider/provider.dart';
 
     Map<String, dynamic> toJson() {
       return {
-        'markers': markers.map((marker) {
-          return {
-            'type': marker == markers.first ? true : false,
+        'markers':[
+          {
+            'type':true,
+             'position':{
+               'lat': markers.first.position.latitude,
+               'lng': markers.first.position.longitude,
+                },
+             },
+          {
+            'type': false,
             'position': {
-              'lat': marker.position.latitude,
-              'lng': marker.position.longitude,
+              'lat': markers.last.position.latitude,
+              'lng': markers.last.position.longitude,
             },
-          };
-        }).toList(),
-
+          }
+        ],
         'polylines': polylines.map((polyline) {
           return {
             'points': polyline.points.map((point) {

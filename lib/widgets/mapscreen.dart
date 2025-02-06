@@ -47,7 +47,6 @@ class _MapScreenState extends State<MapScreen> {
       }
     }
     appState.fetchRoutes();
-    print(appState.markers.first.position);
   }
 
   @override
@@ -253,7 +252,7 @@ class _MapScreenState extends State<MapScreen> {
           ) ;
       _tempMarkers.clear();
       appState.markers.add(routeData.routeMarker);
-      appState.postRoutes(routeData.modelJson!);
+      appState.postRoutes(routeData.toJson());
       _routePoints.clear();
       _polylines.clear();
     });

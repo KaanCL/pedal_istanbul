@@ -35,7 +35,7 @@ class RouteData {
     this.photos = const [],
   }) {
     routePos = routeMarker.getRoutePos;
-    if(!isDirectionDataFetched){getRouteInfo();getStreetViewUrls()}
+    if(!isDirectionDataFetched){getRouteInfo();getStreetViewUrls();};
 
   }
 
