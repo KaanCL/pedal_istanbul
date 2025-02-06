@@ -67,7 +67,6 @@ class AppState with ChangeNotifier{
     }
   }
 
-
   Future<void> postRoutes(Map<String,dynamic> routeData)async{
 
     print(routeData);
@@ -81,5 +80,16 @@ class AppState with ChangeNotifier{
 
   }
 
+  Future<void> updateFavoriteRoute(Map<String,dynamic> routeData) async{
 
-}
+    try{
+      await RoutesRespository().updateFavoriteRoute(routeData);
+      notifyListeners();
+    }catch(e){
+      print("Hata: $e");
+
+    }
+
+  }
+
+  }

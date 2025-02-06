@@ -14,6 +14,7 @@ class BottomDragWidget extends StatefulWidget {
 class _BottomDragWidgetState extends State<BottomDragWidget> {
   @override
   Widget build(BuildContext context) {
+    AppState appState = Provider.of<AppState>(context);
     final routeData = Provider.of<AppState>(context).selectedMarker;
 
     if (routeData == null) {
@@ -62,6 +63,10 @@ class _BottomDragWidgetState extends State<BottomDragWidget> {
                           onTap: () {
                             setState(() {
                               routeData.isFavorite = !routeData.isFavorite;
+                              routeData.toJsonAsync().then((json){
+                                appState.updateFavoriteRoute(json);
+                              });
+
                             });
                           },
                           child: Image.asset(

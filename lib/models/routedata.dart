@@ -9,6 +9,7 @@ class RouteData {
   bool isFavorite = false;
  RouteMarker routeMarker;
   final bool isDirectionDataFetched;
+  final String id;
   String startAddress = "";
   String endAddress = "";
   String totalDistance = "0 km";
@@ -34,13 +35,12 @@ class RouteData {
     this.durationValue = 0.0,
     this.caloriesBurned = "0 kcal",
     this.photos = const [],
+    this.id = "",
   }) {
     routePos = routeMarker.getRoutePos;
     initialize();
 
   }
-
-
 
   Future<void> initialize() async{
     if (!isDirectionDataFetched) {
@@ -60,6 +60,7 @@ class RouteData {
     RouteMarker routeMarker = RouteMarker.fromJson(json['routeMarker']);
 
     routeData = RouteData(
+      id:json['_id'],
       name: json['name'],
       routeMarker: routeMarker,
       isDirectionDataFetched: true,
@@ -82,6 +83,7 @@ class RouteData {
 
   Map<String,dynamic> toJson() {
     return {
+      '_id':id,
       'name': name,
       'routeMarker': routeMarker.toJson(),
       'isFavorite': isFavorite,
@@ -121,10 +123,6 @@ class RouteData {
       print("Hata: ${e.toString()}");
     }
   }
-
-
-
-
 
   void calculateCalories() {
     if (durationValue == 0 || distanceValue == 0) {

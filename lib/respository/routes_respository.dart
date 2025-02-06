@@ -33,4 +33,21 @@ class RoutesRespository{
     }
   }
 
+  Future<void> updateFavoriteRoute(Map<String,dynamic> routeData) async{
+
+    final response = await _dio.put(
+        _baseUrl+"route/update/favorite/${routeData['_id']}",data: {
+          "isFavorite":routeData['isFavorite'],
+    });
+
+    if(response.statusCode == 200){
+      print('Favorite route updated');
+    }else{
+      throw Exception('Failed to update favorite routes');
+
+    }
+
+  }
+
+
 }
