@@ -15,6 +15,15 @@ class AppState with ChangeNotifier{
 
   Set<Marker> _markers = {};
 
+  CameraPosition _cameraPosition = CameraPosition(target: LatLng(41.0082, 28.9784), zoom: 12);
+
+
+  CameraPosition get cameraPosition => _cameraPosition;
+
+ void setCameraPosition(LatLng value) {
+    _cameraPosition = CameraPosition(target: value,zoom:14);
+    notifyListeners();
+  }
 
   Set<Marker> get markers => _markers;
 

@@ -42,20 +42,16 @@ class _MapScreenState extends State<MapScreen> {
     super.didChangeDependencies();
     if (!_appStateIsInitialized) {
       appState = Provider.of<AppState>(context, listen: false);
-      if (appState.markers.length == 0) {
-        appState.setEditing(true);
-      }
+      appState.fetchRoutes();
     }
-    appState.fetchRoutes();
-  }
 
+  }
   @override
   void initState() {
     super.initState();
     _loadMapStyle();
+
   }
-
-
 
   @override
   void dispose() {
@@ -88,7 +84,7 @@ class _MapScreenState extends State<MapScreen> {
     return Stack(
       children: [
         GoogleMap(
-          initialCameraPosition: CameraPosition(target: LatLng(41.0082, 28.9784), zoom: 12),
+          initialCameraPosition: appState.selectedMarker == null ? CameraPosition(target: LatLng(41.0082, 28.9784), zoom: 12) : appState.cameraPosition,
           polylines: appState.isEditing ? _polylines : (appState.selectedMarker?.getPolylines ?? {}),
           markers: appState.isEditing ? _tempMarkers : (appState.selectedMarker == null ? appState.markers : (appState.selectedMarker?.getMarkers ?? {})),
           onTap: (LatLng pos) {
@@ -105,7 +101,7 @@ class _MapScreenState extends State<MapScreen> {
             _mapController = controller;
             if(_mapStyle !=null){_mapController.setMapStyle(_mapStyle!);}
           },
-          minMaxZoomPreference: MinMaxZoomPreference(10, 15),
+          minMaxZoomPreference: MinMaxZoomPreference(10, 20),
           cameraTargetBounds: CameraTargetBounds(istanbulBounds),
         ),
         Positioned(
@@ -263,6 +259,7 @@ class _MapScreenState extends State<MapScreen> {
 
   void _onMarkerTap(RouteData route) {
       appState.setSelectedMarker(route);
+      appState.setCameraPosition(route.routeMarker.position);
   }
   void _cancelEdit(){
     setState(() {

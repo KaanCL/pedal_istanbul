@@ -129,24 +129,28 @@ class RouteData {
       caloriesBurned = "0 kcal";
       return;
     }
+
+    double weightInKg = 70;
+
     double distanceInKm = distanceValue / 1000;
-    double avgSpeed = (distanceInKm) / (durationValue / 3600);
+    double avgSpeed = distanceInKm / (durationValue / 3600);
     double caloriesPerHour;
 
     if (avgSpeed < 15) {
-      caloriesPerHour = 280;
+      caloriesPerHour = 280 * (weightInKg / 70);
     } else if (avgSpeed < 20) {
-      caloriesPerHour = 400;
+      caloriesPerHour = 400 * (weightInKg / 70);
     } else if (avgSpeed < 25) {
-      caloriesPerHour = 600;
+      caloriesPerHour = 600 * (weightInKg / 70);
     } else {
-      caloriesPerHour = 800;
+      caloriesPerHour = 800 * (weightInKg / 70);
     }
 
     double calories = (caloriesPerHour / 60) * (durationValue / 60);
 
     caloriesBurned = "${calories.toStringAsFixed(1)} kcal";
   }
+
 
   void getStreetViewUrls() {
     if (routePos.isEmpty) {
