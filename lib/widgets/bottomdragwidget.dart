@@ -63,10 +63,7 @@ class _BottomDragWidgetState extends State<BottomDragWidget> {
                           onTap: () {
                             setState(() {
                               routeData.isFavorite = !routeData.isFavorite;
-                              routeData.toJsonAsync().then((json){
-                                appState.updateFavoriteRoute(json);
-                              });
-
+                              appState.updateFavoriteRoute(routeData.toJson());
                             });
                           },
                           child: Image.asset(

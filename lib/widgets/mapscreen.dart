@@ -220,16 +220,27 @@ class _MapScreenState extends State<MapScreen> {
       RouteMarker? routeMarker = null;
       RouteData? routeData = null;
 
+
+      List<Marker> markerList = markers.toList();
+      Set<Marker> selectedMarkers = {};
+
+      if (markerList.isNotEmpty) {
+        selectedMarkers.add(markerList.first);
+        if (markerList.length > 1) {
+          selectedMarkers.add(markerList.last);
+        }
+      }
+
       routeMarker = RouteMarker(
         position: markers.first.position,
         infoWindow: InfoWindow(title: name),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
-        markers: Set.from(markers.map((m) => Marker(
+        markers: selectedMarkers,/* Set.from(markers.map((m) => Marker(
           markerId: m.markerId,
           position: m.position,
           infoWindow: m.infoWindow,
           icon: m.icon,
-        ))),
+        ))),*/
         routePos: routePoints,
         polylines: Set.from(polylines.map((p) => Polyline(
           polylineId: p.polylineId,
@@ -247,6 +258,7 @@ class _MapScreenState extends State<MapScreen> {
           isDirectionDataFetched: false
           ) ;
       _tempMarkers.clear();
+      appState.routes.add(routeData);
       appState.markers.add(routeData.routeMarker);
       routeData.toJsonAsync().then((json){
         appState.postRoutes(json);
@@ -301,6 +313,7 @@ class _MapScreenState extends State<MapScreen> {
     setState(() {
       if (appState.selectedMarker != null) {
         appState.markers.remove(appState.selectedMarker!.routeMarker);
+        appState.routes.remove(appState.selectedMarker);
         appState.setSelectedMarker(null);
       } else {
         _routePoints.clear();
