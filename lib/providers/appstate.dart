@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:pedal_istanbul/models/routemarker.dart';
 import 'package:pedal_istanbul/respository/routes_respository.dart';
+import 'package:pedal_istanbul/views/favorites.dart';
 
 import '../models/routedata.dart';
 
@@ -10,8 +11,11 @@ class AppState with ChangeNotifier{
   int _currentPageIndex = 0;
   bool _isEditing = false;
 
+  bool _isRouteFetch = false;
+
   RouteData? _selectedMarker;
   List<RouteData> routes = [];
+  List<RouteData> favoriteRoutes = [];
 
   Set<Marker> _markers = {};
 
@@ -20,7 +24,15 @@ class AppState with ChangeNotifier{
 
   CameraPosition get cameraPosition => _cameraPosition;
 
- void setCameraPosition(LatLng value) {
+
+  bool get isRouteFetch => _isRouteFetch;
+
+ void setIsRouteFetch(bool value) {
+    _isRouteFetch = value;
+    notifyListeners();
+  }
+
+  void setCameraPosition(LatLng value) {
     _cameraPosition = CameraPosition(target: value,zoom:14);
     notifyListeners();
   }
@@ -51,11 +63,25 @@ class AppState with ChangeNotifier{
     notifyListeners();
   }
 
+  void addFavoriteRoute(RouteData route){
+    route.isFavorite = !route.isFavorite;
+    updateFavoriteRoute(route.toJson());
+    if(route.isFavorite == true){
+      favoriteRoutes.add(route);
+    }else{
+      favoriteRoutes.remove(route);
+    }
+    notifyListeners();
+  }
+
+
+
   Future<void> fetchRoutes() async{
     try{
       List<RouteData> fetchedRoutes = await RoutesRespository().getRoutes();
       routes = fetchedRoutes;
       _markers.clear();
+      Set<String> existingFavoriteIds = favoriteRoutes.map((route) => route.id).toSet();
       for(var route in routes){
         route.routeMarker = RouteMarker(
           markers: route.routeMarker.getMarkers,
@@ -68,6 +94,10 @@ class AppState with ChangeNotifier{
         );
         print(route.routeMarker.position);
         _markers.add(route.routeMarker);
+        if (route.isFavorite && !existingFavoriteIds.contains(route.id)) {
+          favoriteRoutes.add(route);
+          existingFavoriteIds.add(route.id);
+        }
       }
       notifyListeners();
     }catch(e){

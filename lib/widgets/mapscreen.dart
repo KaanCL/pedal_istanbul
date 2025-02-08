@@ -42,7 +42,10 @@ class _MapScreenState extends State<MapScreen> {
     super.didChangeDependencies();
     if (!_appStateIsInitialized) {
       appState = Provider.of<AppState>(context, listen: false);
-      appState.fetchRoutes();
+      if(appState.isRouteFetch == false){
+        appState.fetchRoutes();
+        appState.setIsRouteFetch(true);
+      }
     }
 
   }
@@ -263,9 +266,9 @@ class _MapScreenState extends State<MapScreen> {
       routeData.toJsonAsync().then((json){
         appState.postRoutes(json);
         });
-
       _routePoints.clear();
       _polylines.clear();
+      appState.setIsRouteFetch(false);
     });
   }
 

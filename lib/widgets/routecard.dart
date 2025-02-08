@@ -70,8 +70,7 @@ class _RouteCardState extends State<RouteCard> {
                   child: InkWell(
                     onTap: () {
                       setState(() {
-                        routeData.isFavorite = !routeData.isFavorite;
-                        appState.updateFavoriteRoute(routeData.toJson());
+                        appState.addFavoriteRoute(routeData);
                       });
                     },
                     child: Image.asset(
